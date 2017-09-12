@@ -1,7 +1,13 @@
 ; ediff one and one character
 ;(setq-default ediff-forward-word-function 'forward-char)
 
+;; make frequently used commands short
+(defalias 'fb 'flyspell-buffer)
+(defalias 'wsc 'whitespace-cleanup)
+(defalias 'wsr 'whitespace-cleanup-region)
+(defalias 'mm 'mail-mode)
 
+(load-file "~/.emacs.d/rst.el")
 
 (add-to-list 'default-frame-alist '(height . 40))
 (add-to-list 'default-frame-alist '(width . 130))
@@ -193,7 +199,7 @@
 ;;
 ;; 2014/05/12
 ;;     * Fixed qml-indent-line
-;;     
+;;
 ;; 2014/04/10
 ;;      * Improve qml-font-lock-keywords.
 ;;
@@ -389,3 +395,62 @@ This is run before the process is cranked up."
 ;;; qml-mode.el ends here
 
 ;; // END QML MODE
+
+
+                                        ; YAML
+(load-file "~/.emacs.d/yaml-mode.el")
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.est\\'" . yaml-mode))
+
+
+
+
+
+(add-hook 'mail-mode-hook 'flyspell-mode)
+
+(defun increment-number-at-point ()
+  (interactive)
+  (skip-chars-backward "0123456789")
+  (or (looking-at "[0123456789]+")
+      (error "No number at point"))
+  (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
+
+(global-set-key (kbd "C-c +") 'increment-number-at-point)
+
+
+;;
+(defun move-line (n)
+  "Move the current line up or down by N lines."
+  (interactive "p")
+  (setq col (current-column))
+  (beginning-of-line) (setq start (point))
+  (end-of-line) (forward-char) (setq end (point))
+  (let ((line-text (delete-and-extract-region start end)))
+    (forward-line n)
+    (insert line-text)
+    ;; restore point to original column in moved line
+    (forward-line -1)
+    (forward-char col)))
+
+(defun move-line-up (n)
+  "Move the current line up by N lines."
+  (interactive "p")
+  (move-line (if (null n) -1 (- n))))
+
+(defun move-line-down (n)
+  "Move the current line down by N lines."
+  (interactive "p")
+  (move-line (if (null n) 1 n)))
+
+(global-set-key (kbd "M-<up>") 'move-line-up)
+(global-set-key (kbd "M-<down>") 'move-line-down)
+
+
+
+(defun snake-case ()
+  (interactive)
+  (progn (replace-regexp "\\([A-Z]\\)" "_\\1" nil
+                         (region-beginning)
+                         (region-end))
+         (downcase-region (region-beginning) (region-end))))
