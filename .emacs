@@ -1,6 +1,37 @@
 ; ediff one and one character
 ;(setq-default ediff-forward-word-function 'forward-char)
 
+;;
+;; python stuff
+;;
+(defun insert-pdb-set-trace ()
+  (interactive)
+  (insert "import pdb; pdb.set_trace()"))
+(global-set-key (kbd "C-c C-a") 'insert-pdb-set-trace)
+
+(defun insert-if-name-then-main ()
+  (interactive)
+  (insert "#!/usr/bin/env python
+from __future__ import print_function
+
+def main(args):
+    pass
+
+if __name__ == '__main__':
+    from sys import argv
+    if len(argv) < 2:
+        exit('Usage: app arg')
+    main(argv[1:])
+")
+  )
+(global-set-key (kbd "C-c C-e") 'insert-if-name-then-main)
+
+;;
+;; end python stuff
+;;
+
+
+
 ;; make frequently used commands short
 (defalias 'fb 'flyspell-buffer)
 (defalias 'wsc 'whitespace-cleanup)
