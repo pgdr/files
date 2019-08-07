@@ -265,3 +265,56 @@ function komodo() {
     export BOOST_ROOT=$KOMODO
     echo "BOOST_ROOT=$KOMODO"
 }
+
+
+
+
+ENV_ROOT=/data/envs
+function activate() {
+    if [ ${1} = "--list" ]
+    then
+        ls $ENV_ROOT
+        return 0
+    else
+        ENV=${ENV_ROOT}/${1}
+        if [[ -d $ENV ]]
+        then
+            echo "Activating env" $ENV
+            source ${ENV}/bin/activate
+        else
+            echo "No such env \"${1}\", use --list"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+function venv() {
+    ENV=${ENV_ROOT}/$2
+
+    if [ $1 = "2" ]
+    then
+        CMD="virtualenv $ENV"
+    elif [ $1 = "3" ]
+    then
+        CMD="python3 -m venv $ENV"
+    else
+        printf "Usage: venv 2|3 name"
+        return 1
+    fi
+    if [[ -d $ENV ]]
+    then
+        printf "Environment exists, delete first\n"
+        return 1
+    fi
+    $CMD || (printf "\nError constructing env ${ENV}" && return 1)
+    printf "Created ${2}, activating ...\n"
+    activate ${2}
+    printf "Activated ${2}, upgrading ...\n"
+    pip install --upgrade pip
+    pip install --upgrade ipython numpy pandas matplotlib
+    printf "\nDone upgrading\n\n\n"
+    python --version
+    printf "\n"
+    pip freeze
+}
